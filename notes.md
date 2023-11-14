@@ -1,17 +1,11 @@
---------
-- FILTRE VELOCITE YAMAHA REFACE
---------
+# FILTRE VELOCITE YAMAHA REFACE CP 
 
 Install
 ----
-modules python : mido, python-rtmidi (et non rtmidi)
-
-Le "local control" doit être à OFF et "midi control" à ON : voir manuels.
-
-Dans `c.local`
-```
-bash -c '/usr/bin/python /home/pi/midi_velocity_filter.py > /home/pi/midi_velocity_filter.log 2>&1' &
-```
+- Modules python : mido, python-rtmidi (et non rtmidi)
+- (OBSOLETE) Le "local control" doit être à OFF et "midi control" à ON : voir manuels.
+- S'assurer que /home/pi/startup.sh est exécutable
+- Ajouter `su -c /home/pi/startup.sh pi &` dans `rc.local`
 
 
 Doc

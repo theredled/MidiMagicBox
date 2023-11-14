@@ -2,23 +2,36 @@
 
 import mido, time, traceback, sys, getopt, argparse
 
+multiport = False
 min_velocity = 30
 max_velocity = 110
 is_verbose = None
-inport = None
-outport = None
+inport = [] if multiport else None
+outport = [] if multiport else None
 control_port = None
+sustain_is_active = False
 
-def output_message(message, desc):
-    if is_verbose:
-        print('output (%s): %s' % (desc, message))
+def send_midi(message, desc):
+    if multiport:
+        return send_midi_multiport(message, desc)
+
+    print_v('output (%s): %s' % (desc, message))
     outport.send(message)
+
+def print_v(*args):
+    if is_verbose:
+        print(*args)
+
+def send_midi_multiport(message, desc):
+    print_v('output (%s): %s' % (desc, message))
+
+    for port in outport:
+        port.send(message)
 
 def listen_control(message):
     global min_velocity, max_velocity
     try:
-        if is_verbose:
-            print('control input:', message)
+        print_v('control input:', message)
 
         if message.type == 'note_on' and message.note == 36:
             time.sleep(2)
@@ -27,18 +40,26 @@ def listen_control(message):
             min_velocity = message.value
         elif message.type == 'control_change' and  message.control == 2:
             max_velocity = message.value
+        #-- save preset
+        elif message.type == 'program_change' and sustain_is_active:
+
+        #-- load preset
+        elif message.type == 'program_change' and not sustain_is_active:
+
 
     except Exception as e:
         print('exception:', traceback.print_exception(e))
 
-
 def listen_input(message):
     try:
-        if is_verbose:
-            print('input:', message)
+        print_v('input:', message)
+
+        if message.type == 'control_change' and message.control == 64:
+            sustain_is_active = message.value != 0
+            print_v('sustain ', 'active' if sustain_is_active else 'inactive')
 
         if message.type != 'note_on' or message.velocity == 0:
-            output_message(message, 'bypassed')
+            send_midi(message, 'bypassed')
             return
 
         #-- ALGO 1
@@ -48,14 +69,18 @@ def listen_input(message):
         new_velocity = round(min_velocity + new_range * (message.velocity/127))
 
         filtered_message = message.copy(velocity=new_velocity)
-        output_message(filtered_message, 'changed')
+        send_midi(filtered_message, 'changed')
     except Exception as e:
         print('exception:', traceback.print_exception(e))
 
 def connect_devices():
+    if multiport:
+        return connect_devices_multiport()
+
     global inport, outport, control_port
     print('input devices:', mido.get_input_names())
     print('output devices', mido.get_output_names())
+
     device_name = ([item for item in mido.get_input_names() if item.startswith('reface CP')] or [None])[0]
     control_device_name = ([item for item in mido.get_input_names() if item.startswith('LPD8')] or [None])[0]
     #device_name = mido.get_input_names()[-1]
@@ -79,13 +104,34 @@ def connect_devices():
     if control_device_name:
         print('open control_port')
         control_port = mido.open_input(control_device_name, callback=listen_control)
-    #disable_local_control_message = mido.Message('sysex', data=[0x06, 0x00])
-    #outport.send(disable_local_control_message)
+
+    send_sysex_parameter(0x00, 0x06, 0, 'disable "Local control" for Reface CP')
+    send_sysex_parameter(0x00, 0x0E, 1, 'enable "MIDI control" for Reface CP')
+    send_sysex_parameter(0x30, 0x02, 2, 'wurli')
+
+def connect_devices_multiport():
+    global inport, outport
+    print('input devices:', mido.get_input_names())
+    print('output devices', mido.get_output_names())
+
+    for port in inport:
+        port.close()
+    for port in outport:
+        port.close()
+    print('closed')
+
+    for device_name in mido.get_input_names():
+        inport.append(mido.open_input(device_name, callback=listen_input))
+    for device_name in mido.get_output_names():
+        outport.append(mido.open_output(device_name))
+
+def send_sysex_parameter(addrHighByte, addrLowByte, data, desc = None):
+    message = mido.parse([0xF0, 0x43, 0x10, 0x7F, 0x1C, 0x04, addrHighByte, 0x00, addrLowByte, data, 0xF7])
+    send_midi(message, desc)
 
 
 def main(argv):
     global is_verbose
-    #opts = getopt.getopt(argv, 'v')
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbosity', action="count",
                         help="increase output verbosity (e.g., -vv is more than -v)")
