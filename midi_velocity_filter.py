@@ -52,6 +52,11 @@ def send_midi_multiport(message, desc):
     for port in outport:
         port.send(message)
 
+def dump_reface_cp_sysex_params(param_data):
+    for i, val in enumerate(param_data):
+        print('Param ', reface_cp_parameters[i], val)
+
+
 def save_preset_input_listener(preset_number, message):
     print_v('save_preset_input_listener', preset_number)
     if message.type != 'sysex':
@@ -60,8 +65,7 @@ def save_preset_input_listener(preset_number, message):
         return
     byte_count = message.data[5]
     param_data = message.data[10:25]
-    for i, val in enumerate(param_data):
-        print('Param ', reface_cp_parameters[i], val)
+    dump_reface_cp_sysex_params(param_data)
 
     write_preset(preset_number, {
         'sysex_params': param_data,
@@ -126,6 +130,10 @@ def load_preset(num):
     for i, val in enumerate(preset['sysex_params']):
         send_sysex_parameter(0x30, i, val)
 
+    #-- Volume, doit être passé à la fin
+    send_sysex_parameter(0x30, 0, preset['sysex_params'][0])
+
+    dump_reface_cp_sysex_params(preset['sysex_params'])
     print('Loaded preset #%i' % num)
     #send_sysex_parameter_request(0x30, 0x02, 'request instr')
 
@@ -172,7 +180,6 @@ def listen_input(message):
                 return
 
         if message.type == 'sysex':
-            #print_v('sysex input:', array_as_hex(message.data))
             return
 
         if message.type == 'control_change' and message.control == 64:
