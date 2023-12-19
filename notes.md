@@ -2,11 +2,16 @@
 
 Install
 ----
+- Modules linux : libasound2-dev, python-dev
 - Modules python : mido, python-rtmidi (et non rtmidi)
 - (OBSOLETE) Le "local control" doit être à OFF et "midi control" à ON : voir manuels.
 - S'assurer que /home/pi/startup.sh est exécutable
-- Ajouter `su -c /home/pi/startup.sh pi &` dans `rc.local`
+- Ajouter `su -c /home/pi/startup.sh pi &` dans `/etc/rc.local`
 
+
+RPi
+----
+Connection : `ssh pi@raspberrypi.local` pas de mdp
 
 Doc
 ----

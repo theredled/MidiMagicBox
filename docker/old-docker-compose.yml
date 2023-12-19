@@ -1,0 +1,30 @@
+version: '3.7'
+
+volumes:
+  sql0-data:
+
+services:
+  sql0:
+    image: mariadb:10.6
+    ports: ["3307:3306"]
+    environment:
+      MARIADB_DATABASE: melomane
+      MARIADB_USER: melomane
+      MARIADB_PASSWORD: melomane
+      MARIADB_ROOT_PASSWORD: melomane
+    volumes:
+      - sql0-data:/var/lib/mysql:Z
+
+  php_apache:
+    build: .
+    ##image: webdevops/php-apache:7.0
+    links:
+      - sql0:mysql
+    ports:
+      - 8081:80
+      - 9000:9000
+    volumes:
+      - /Users/theredled/Sites/melomane/deploy_new:/var/www/html/melomane
+      - ./php.ini:/opt/docker/etc/php/php.ini
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
