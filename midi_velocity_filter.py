@@ -100,24 +100,6 @@ def save_preset(num):
     send_sysex_parameter_dump_request('dump request')
     print_v('add to input_listeners')
     input_listeners['save_preset'] = partial(save_preset_input_listener, preset_number=num)
-    return
-    #-- Bulk Header
-
-    #print('waiting for header', inport)
-    #header_message = inport.receive()
-    #print('header', header_message)
-    ##-- Bulk Content
-    #print('waiting for content')
-    #content_message = inport.receive()
-    #byte_count = content_message.data[5]
-    #print('content_message', array_as_hex(content_message.data))
-    #param_data = content_message.data[10:25]
-    #print('param_data', param_data)
-    #for i, val in enumerate(param_data):
-    #    print('Param ', reface_cp_parameters[i], val)
-    #-- Bulk Footer
-    #print('waiting for footer')
-    #footer_message = inport.receive()
 
 def load_preset(num):
     global min_velocity, max_velocity
@@ -135,16 +117,11 @@ def load_preset(num):
 
     dump_reface_cp_sysex_params(preset['sysex_params'])
     print('Loaded preset #%i' % num)
-    #send_sysex_parameter_request(0x30, 0x02, 'request instr')
 
 def listen_control(message):
     global min_velocity, max_velocity
     try:
         print_v('control input:', message, message.type == 'program_change' and not sustain_is_active)
-
-        #if message.type == 'note_on' and message.note == 36:
-        #    time.sleep(2)
-        #    connect_devices()
 
         #-- Vélocité MIN
         if message.type == 'control_change' and message.control == 1:
@@ -190,8 +167,6 @@ def listen_input(message):
             send_midi(message, 'bypassed')
             return
 
-        #-- ALGO 1
-        #velocity = min(max_velocity, max(message.velocity, min_velocity))
         #-- ALGO 2
         new_range = max_velocity - min_velocity
         new_velocity = round(min_velocity + new_range * (message.velocity/127))
@@ -227,12 +202,7 @@ def connect_devices():
 
     if device_name:
         print('open inport outport')
-        #inport = mido.open_input(device_name)
         inport = mido.open_input(device_name, callback=listen_input)
-        #print('wait message')
-        #message = inport.receive()
-        #print('voila', message)
-
         outport = mido.open_output(device_name)
     if control_device_name:
         print('open control_port')
@@ -240,8 +210,6 @@ def connect_devices():
 
     send_sysex_parameter(0x00, 0x06, 0, 'disable "Local control" for Reface CP')
     send_sysex_parameter(0x00, 0x0E, 1, 'enable "MIDI control" for Reface CP')
-    #send_sysex_parameter(0x30, 0x00, 127, 'volume')
-    #send_sysex_parameter_request(0x30, 0x02, 'request instr')
 
 def connect_devices_multiport():
     global inport, outport
@@ -281,11 +249,7 @@ def main(argv):
 
     retrieve_presets()
 
-    #save_preset(4)
-
     while True:
-        #new_message = inport.receive()
-        #listen_input(new_message)
         time.sleep(1)
 
 if __name__ == "__main__":
