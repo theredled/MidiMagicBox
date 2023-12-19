@@ -1,4 +1,5 @@
 
 - plug'n'play
-- presets
+OK - presets
+OK - POO / plugins
 - liaison sampler

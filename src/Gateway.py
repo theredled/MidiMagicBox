@@ -6,6 +6,7 @@ from src.debug import print_v
 import src.plugin.Velocity as Velocity
 import src.plugin.RefaceCp as RefaceCp
 import src.plugin.Presets as Presets
+import src.plugin.SamplerBox as SamplerBox
 #import pydevd
 
 
@@ -20,6 +21,7 @@ class Gateway:
         self.add_plugin(Velocity.Velocity())
         self.add_plugin(RefaceCp.RefaceCp())
         self.add_plugin(Presets.Presets())
+        self.add_plugin(SamplerBox.SamplerBox())
 
     def add_plugin(self, plugin):
         plugin.set_gateway(self)
