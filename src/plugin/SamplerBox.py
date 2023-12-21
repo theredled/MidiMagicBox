@@ -1,6 +1,6 @@
-import src.plugin.Plugin as Plugin
+from . import Plugin
 import mido, sys
-import SamplerBox.src.samplerbox as samplerbox
+import samplerbox_src.samplerbox as samplerbox
 
 class SamplerBox(Plugin.Plugin):
 
