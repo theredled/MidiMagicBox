@@ -1,11 +1,11 @@
 import src.plugin.Plugin as Plugin
 import mido, sys
-import samplerbox
-#import "../../SamplerBox/src/samplerbox.py" as samplerbox
+import SamplerBox.src.samplerbox as samplerbox
 
 class SamplerBox(Plugin.Plugin):
 
     def __init__(self):
+        samplerbox.init()
         super().__init__()
         self.enabled = False
 
@@ -28,5 +28,4 @@ class SamplerBox(Plugin.Plugin):
         callback({
             'sampler_bank': 2 if self.enabled else None
         })
-
 

@@ -96,6 +96,16 @@ class Gateway:
             print('open control_port')
             self.control_port = mido.open_input(control_device_name, callback=self.listen_control)
 
+        if not self.outport:
+            print('No outport found')
+            return
+        if not self.inport:
+            print('No inport found')
+            return
+        if not self.control_port:
+            print('No control_port found')
+            return
+
         for p in self.plugins:
             p.after_connect_device()
 
