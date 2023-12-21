@@ -1,5 +1,6 @@
 from . import Plugin
-import mido, sys
+import mido, sys, math
+from src.debug import print_v
 import samplerbox_src.samplerbox as samplerbox
 
 class SamplerBox(Plugin.Plugin):
@@ -8,10 +9,22 @@ class SamplerBox(Plugin.Plugin):
         samplerbox.init()
         super().__init__()
         self.enabled = False
+        self.bank_number = None
 
     def listen_control(self, message):
         if message.type == 'control_change' and message.control == 4:
             self.enabled = message.value > 64
+            if not self.enabled:
+                return
+
+            new_bank_number = math.floor((message.value - 64) / 10)
+            if self.bank_number == new_bank_number:
+                return
+
+            self.bank_number = new_bank_number
+            print_v('Sampler - Bank #%i' % self.bank_number)
+            samplerbox.preset = self.bank_number
+            samplerbox.LoadSamples()
 
     def listen_input(self, message):
         if message.type == 'note_on' and self.enabled:
