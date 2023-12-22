@@ -1,12 +1,15 @@
 from . import Plugin
 import mido, sys, math
 from src.debug import print_v
-import samplerbox_src.samplerbox as samplerbox
+import samplerbox_src.SamplerBox as SamplerBox_main
 
 class SamplerBox(Plugin.Plugin):
 
     def __init__(self):
-        samplerbox.init()
+        self.samplerbox = SamplerBox_main.SamplerBox()
+        self.samplerbox.load_samples()
+        self.samplerbox.connect_audio_output()
+
         super().__init__()
         self.enabled = False
         self.bank_number = None
@@ -23,12 +26,12 @@ class SamplerBox(Plugin.Plugin):
 
             self.bank_number = new_bank_number
             print_v('Sampler - Bank #%i' % self.bank_number)
-            samplerbox.preset = self.bank_number
-            samplerbox.load_samples()
+            self.samplerbox.preset = self.bank_number
+            self.samplerbox.load_samples()
 
     def listen_input(self, message):
         if message.type == 'note_on' and self.enabled:
-            samplerbox.midi_callback((message.bytes(), None))
+            self.samplerbox.midi_callback((message.bytes(), None))
             return True
 
     def load_preset_data(self, data):
