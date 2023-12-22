@@ -24,11 +24,11 @@ class SamplerBox(Plugin.Plugin):
             self.bank_number = new_bank_number
             print_v('Sampler - Bank #%i' % self.bank_number)
             samplerbox.preset = self.bank_number
-            samplerbox.LoadSamples()
+            samplerbox.load_samples()
 
     def listen_input(self, message):
         if message.type == 'note_on' and self.enabled:
-            samplerbox.MidiCallback((message.bytes(), None))
+            samplerbox.midi_callback((message.bytes(), None))
             return True
 
     def load_preset_data(self, data):
