@@ -26,7 +26,7 @@ class Plugin:
     def send_midi(self, message, desc):
         return self.gateway.send_midi(message, desc)
 
-    def after_connect_device(self):
+    def after_connect_device(self, is_input, device_name):
         pass
 
     def after_startup(self):

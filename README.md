@@ -17,7 +17,9 @@ Install on RPi
 - `/home/pi$` `git clone https://github.com/theredled/pi-midi`
 - Make sure that `/home/pi/MidiMagicBox/startup.sh` est exécutable
 - Append `su -c /home/pi/MidiMagicBox/startup.sh pi &` to `/etc/rc.local`
-
+- Copy `src/config.py.sample` to `src/config.py`
+- *(Optional)*  Modify `src/config.py` if you want to change MIDI channels (etc).
+  
 *+ SamplerBox :*
 - Install forked Samplerbox : https://github.com/theredled/SamplerBox
 - Append `export PYTHONPATH=$PYTHONPATH:/home/pi/SamplerBox` to `/etc/rc.local`

@@ -98,6 +98,7 @@ class RefaceCp(Plugin.Plugin):
     def print_preset_content(self, data):
         self.dump_sysex_params(data)
 
-    def after_connect_device(self):
-        self.send_sysex_parameter(0x00, 0x06, 0, 'disable "Local control" for Reface CP')
-        self.send_sysex_parameter(0x00, 0x0E, 1, 'enable "MIDI control" for Reface CP')
+    def after_connect_device(self, is_input, device_name):
+        if not is_input and 'reface CP' in device_name:
+            self.send_sysex_parameter(0x00, 0x06, 0, 'disable "Local control" for Reface CP')
+            self.send_sysex_parameter(0x00, 0x0E, 1, 'enable "MIDI control" for Reface CP')
