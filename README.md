@@ -14,7 +14,7 @@ Install on RPi
 ----
 - Linux modules : `libasound2-dev`, `python-dev`
 - Python modules : `mido`, `python-rtmidi` (NOT `rtmidi-python`)
-- `/home/pi$` `git clone https://github.com/theredled/pi-midi`
+- `/home/pi$` `git clone https://github.com/theredled/MidiMagicBox`
 - Make sure that `/home/pi/MidiMagicBox/startup.sh` is executable
 - Append `su -c /home/pi/MidiMagicBox/startup.sh pi &` to `/etc/rc.local`
 
