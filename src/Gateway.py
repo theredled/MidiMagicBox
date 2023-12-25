@@ -14,13 +14,9 @@ from . import config
 
 class Gateway:
     def __init__(self):
-        #self.inport = None
-        #self.outport = None
-        #self.control_port = None
         self.input_devices = {}
         self.output_devices = {}
         self.sustain_is_active = False
-        #self.input_listeners = {}
         self.plugins = []
         self.add_plugin(Velocity())
         self.add_plugin(RefaceCp())
@@ -42,7 +38,7 @@ class Gateway:
         try:
             if message.channel != config.CONTROL_MIDI_CHANNEL:
                 return
-            #print_v('control input:', message, message.type == 'program_change' and not self.sustain_is_active)
+
             for p in self.plugins:
                 result = p.listen_control(message)
                 if result is True:
@@ -82,49 +78,10 @@ class Gateway:
             self.send_midi(message, 'filtered')
         except Exception as e:
             print('exception:', traceback.print_exception(e))
-    '''
-    def connect_devices(self):
-        print('input devices:', mido.get_input_names())
-        print('output devices', mido.get_output_names())
-
-        device_name = ([item for item in mido.get_input_names() if item.startswith('reface CP')] or [None])[0]
-        control_device_name = ([item for item in mido.get_input_names() if item.startswith('LPD8')] or [None])[0]
-        # device_name = mido.get_input_names()[-1]
-        print('using: ', device_name)
-
-        if self.inport:
-            print('close inport')
-            self.inport.close()
-        if self.outport:
-            print('close outport')
-            self.outport.close()
-        if self.control_port:
-            print('close control_port')
-            self.control_port.close()
-        print('closed')
-
-        if device_name:
-            print('open inport outport')
-            self.inport = mido.open_input(device_name, callback=self.listen_input)
-            self.outport = mido.open_output(device_name)
-        if control_device_name:
-            print('open control_port')
-            self.control_port = mido.open_input(control_device_name, callback=self.listen_control)
-
-        if not self.outport:
-            print('No outport found')
-            return
-        if not self.inport:
-            print('No inport found')
-            return
-        if not self.control_port:
-            print('No control_port found')
-            return
-    '''
 
     def find_new_devices(self, found_list, current_list):
         new_list = found_list - current_list
-        new_list = list(filter(lambda name: ('Midi Through' not in name), new_list))
+        new_list = list(filter(lambda name: ('Midi Through' not in name and 'RtMidi' not in name), new_list))
         return new_list
 
     def main(self):
@@ -134,8 +91,6 @@ class Gateway:
         args = parser.parse_args()
         debug.is_verbose = args.verbosity
 
-        #self.connect_devices()
-
         for p in self.plugins:
             p.after_startup()
 
@@ -143,10 +98,12 @@ class Gateway:
             new_input_devices_names = self.find_new_devices(mido.get_input_names(), self.input_devices.keys())
 
             if len(new_input_devices_names):
+                print('list mido devices', mido.get_input_names())
                 for device_name in new_input_devices_names:
                     new_device = mido.open_input(device_name, callback=self.listen_input)
                     print('Opened MIDI input: ' + str(device_name))
                     self.input_devices[device_name] = new_device
+                print('current input_devices', self.input_devices.keys())
                 for p in self.plugins:
                     p.after_connect_device(True, new_input_devices_names)
 
@@ -158,6 +115,6 @@ class Gateway:
                     print('Opened MIDI output: ' + str(device_name))
                     self.output_devices[device_name] = new_device
                 for p in self.plugins:
-                    p.after_connect_device(False, new_input_devices_names)
+                    p.after_connect_device(False, new_output_devices_names)
 
             time.sleep(2)

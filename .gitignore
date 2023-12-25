@@ -2,3 +2,4 @@
 /.idea/
 presets.json
 /src/config.py
+midi_magic_box.log
