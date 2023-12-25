@@ -12,10 +12,10 @@ Midi Magic Box provides ability to:
 
 Install on RPi
 ----
-- Linux modules : libasound2-dev, python-dev
-- Python modules : mido, python-rtmidi (et non rtmidi)
+- Linux modules : `libasound2-dev`, `python-dev`
+- Python modules : `mido`, `python-rtmidi` (NOT `rtmidi-python`)
 - `/home/pi$` `git clone https://github.com/theredled/pi-midi`
-- Make sure that `/home/pi/MidiMagicBox/startup.sh` est exécutable
+- Make sure that `/home/pi/MidiMagicBox/startup.sh` is executable
 - Append `su -c /home/pi/MidiMagicBox/startup.sh pi &` to `/etc/rc.local`
 
 *+ SamplerBox :*
