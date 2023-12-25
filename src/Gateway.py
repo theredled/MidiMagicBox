@@ -52,17 +52,18 @@ class Gateway:
         try:
             print_v('input:', message)
 
-            if message.channel == config.CONTROL_MIDI_CHANNEL:
+            if not hasattr(message, 'channel'):
+                pass
+            elif message.channel == config.CONTROL_MIDI_CHANNEL:
                 print_v('= control input')
                 return self.listen_control(message)
-            if message.channel != config.KEYBOARD_MIDI_CHANNEL:
+            elif message.channel != config.KEYBOARD_MIDI_CHANNEL:
                 return
 
             print_v('= keyboard input')
 
             for p in self.plugins:
                 result = p.listen_input(message)
-                #print('result', p, result, isinstance(result, mido.Message))
                 if result and isinstance(result, mido.Message):
                     message = result
                 elif result is True:
@@ -84,6 +85,47 @@ class Gateway:
         new_list = list(filter(lambda name: ('Midi Through' not in name and 'RtMidi' not in name), new_list))
         return new_list
 
+    def find_removed_devices(self, found_list, current_list):
+        new_list = current_list - found_list
+        return new_list
+
+    def update_input_devices(self):
+        new_devices_names = self.find_new_devices(mido.get_input_names(), self.input_devices.keys())
+        removed_devices_names = self.find_removed_devices(mido.get_input_names(), self.input_devices.keys())
+
+        if len(new_devices_names):
+            print_v('list mido devices', mido.get_input_names())
+            for device_name in new_devices_names:
+                new_device = mido.open_input(device_name, callback=self.listen_input)
+                print_v('Opened MIDI input: ' + str(device_name))
+                self.input_devices[device_name] = new_device
+            print_v('current input_devices', self.input_devices.keys())
+            for p in self.plugins:
+                p.after_connect_device(True, new_devices_names)
+        if len(removed_devices_names):
+            for device_name in removed_devices_names:
+                self.input_devices[device_name].close()
+                self.input_devices.pop(device_name)
+                print_v('Closed MIDI input: ' + str(device_name))
+
+    def update_output_devices(self):
+        new_devices_names = self.find_new_devices(mido.get_output_names(), self.output_devices.keys())
+        removed_devices_names = self.find_removed_devices(mido.get_output_names(), self.output_devices.keys())
+
+        if len(new_devices_names):
+            for device_name in new_devices_names:
+                new_device = mido.open_output(device_name)
+                print_v('Opened MIDI output: ' + str(device_name))
+                self.output_devices[device_name] = new_device
+            for p in self.plugins:
+                p.after_connect_device(False, new_devices_names)
+        if len(removed_devices_names):
+            for device_name in removed_devices_names:
+                self.output_devices[device_name].close()
+                self.output_devices.pop(device_name)
+                print_v('Closed MIDI output: ' + str(device_name))
+
+
     def main(self):
         parser = argparse.ArgumentParser()
         parser.add_argument('-v', '--verbosity', action="count",
@@ -95,26 +137,6 @@ class Gateway:
             p.after_startup()
 
         while True:
-            new_input_devices_names = self.find_new_devices(mido.get_input_names(), self.input_devices.keys())
-
-            if len(new_input_devices_names):
-                print('list mido devices', mido.get_input_names())
-                for device_name in new_input_devices_names:
-                    new_device = mido.open_input(device_name, callback=self.listen_input)
-                    print('Opened MIDI input: ' + str(device_name))
-                    self.input_devices[device_name] = new_device
-                print('current input_devices', self.input_devices.keys())
-                for p in self.plugins:
-                    p.after_connect_device(True, new_input_devices_names)
-
-            new_output_devices_names = self.find_new_devices(mido.get_output_names(), self.output_devices.keys())
-
-            if len(new_output_devices_names):
-                for device_name in new_output_devices_names:
-                    new_device = mido.open_output(device_name)
-                    print('Opened MIDI output: ' + str(device_name))
-                    self.output_devices[device_name] = new_device
-                for p in self.plugins:
-                    p.after_connect_device(False, new_output_devices_names)
-
+            self.update_input_devices()
+            self.update_output_devices()
             time.sleep(2)
