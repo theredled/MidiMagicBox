@@ -2,13 +2,12 @@
 
 Midi Magic Box is a Python software, mainly for Raspberry PI but compatible at least with MacOS and most Linux. 
 Midi Magic Box provides ability to:
-- Control velocity of MIDI keyboards, only fully compatible with **Yamaha Reface CP** for the moment.
-- Controlled by secondary MIDI device (such as Akai LPD8) 
-- Provides Presets system for said Yamaha Reface CP
+- Control velocity of MIDI keyboards
+- Provides Presets system for **Yamaha Reface CP**
 - Provides secondary volume for Reface CP (useful for presets)
+- All parameters are controlled via a separate channel (via a separate device such as Akai LPD8 for example)
 - Linked to Samplerbox (https://github.com/theredled/SamplerBox) to provide sampling abilities.
-
-# FILTRE VELOCITE YAMAHA REFACE CP 
+- A plugin system to easily implement new features in Python
 
 Install on RPi
 ----
