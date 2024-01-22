@@ -113,7 +113,10 @@ class RefaceCp(Plugin.Plugin):
     def print_preset_content(self, data):
         self.dump_sysex_params(data['sysex_params'])
 
-    def after_connect_device(self, is_input, device_name):
-        if not is_input and 'reface CP' in device_name:
+    def after_connect_device(self, is_input, new_devices_names):
+        print_v('CP after_connect_device', new_devices_names, is_input)
+        CP_matches = [match for match in new_devices_names if "reface CP" in match]
+
+        if not is_input and len(CP_matches):
             self.send_sysex_parameter(0x00, 0x06, 0, 'disable "Local control" for Reface CP')
             self.send_sysex_parameter(0x00, 0x0E, 1, 'enable "MIDI control" for Reface CP')
