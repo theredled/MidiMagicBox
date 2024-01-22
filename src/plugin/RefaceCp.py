@@ -28,8 +28,9 @@ class RefaceCp(Plugin.Plugin):
         self.pending_save_preset_callback = None
 
     def dump_sysex_params(self, param_data):
+        print('enum', enumerate(param_data), param_data)
         for i, val in enumerate(param_data):
-            print('Param ', self.reface_cp_parameters[i], val)
+            print('Param %s = %s ' % (self.reface_cp_parameters[i], val if val is not None else 'None'))
 
     def send_sysex_parameter(self, addr_high_byte, addr_low_byte, data, desc=None):
         message = mido.parse([
@@ -74,7 +75,19 @@ class RefaceCp(Plugin.Plugin):
             return
         if message.data[0] != 0x43 or message.data[7:10] != (0x30, 0, 0):
             return
-        param_data = message.data[10:25]
+        param_data = list(message.data[10:25])
+
+
+        print_v('all data', message.data)
+        print_v('selected data', param_data)
+
+        # -- Fix some bugs for hidden piano
+        # Vol 0 > NULL
+        if param_data[0] == 0:
+            param_data[0] = None
+        # Drive full = password for piano = NULL instrument 
+        if param_data[3] == 127:
+            param_data[2] = None
 
         self.pending_save_preset_callback({'sysex_params': param_data})
         self.pending_save_preset_callback = None
@@ -84,10 +97,12 @@ class RefaceCp(Plugin.Plugin):
         if 'sysex_params' not in data:
             return
         for i, val in enumerate(data['sysex_params']):
-            self.send_sysex_parameter(0x30, i, val)
+            if val is not None:
+                self.send_sysex_parameter(0x30, i, val)
 
         # -- Volume, doit être passé à la fin
-        self.send_sysex_parameter(0x30, 0, data['sysex_params'][0])
+        if data['sysex_params'][0] is not None:
+            self.send_sysex_parameter(0x30, 0, data['sysex_params'][0])
 
         self.dump_sysex_params(data['sysex_params'])
 
@@ -96,7 +111,7 @@ class RefaceCp(Plugin.Plugin):
         self.pending_save_preset_callback = callback
 
     def print_preset_content(self, data):
-        self.dump_sysex_params(data)
+        self.dump_sysex_params(data['sysex_params'])
 
     def after_connect_device(self, is_input, device_name):
         if not is_input and 'reface CP' in device_name:

@@ -27,7 +27,7 @@ class Presets(Plugin.Plugin):
 
     def write_preset(self, number, data):
         print('Saving settings at preset #%i with content %s' % (number, data))
-        self.print_preset_content(data)
+        self.print_content(data)
         self.presets[str(number)] = data
         with open(self.presets_file_path, 'w') as fp:
             json.dump(self.presets, fp)
@@ -62,7 +62,11 @@ class Presets(Plugin.Plugin):
 
     def load_preset(self, num):
         print_v('load_preset', self.presets)
-        preset = self.presets[str(num)]
+        try:
+            preset = self.presets[str(num)] or None
+        except KeyError:
+            print('Preset %i not exists' % num)
+            return
         print('Loading preset #%i with data %s' % (num, preset))
         for p in self.gateway.plugins:
             p.load_preset_data(preset)
@@ -75,3 +79,10 @@ class Presets(Plugin.Plugin):
 
     def after_startup(self):
         self.retrieve_presets()
+
+    #def after_connect_device(self, is_input, device_name):
+    #    if not is_input:
+    #        for p in self.gateway.plugins:
+    #            p.reset_preset_data(data)
+
+    

@@ -31,3 +31,6 @@ class Plugin:
 
     def after_startup(self):
         pass
+
+    #def reset_preset_data(self, data):
+    #    return False
