@@ -35,4 +35,4 @@ Option :
 
 # About
 
-Author : Benoît Guchet (twitter: [@Yoggghourt](https:/twitter.com/yoggghourt), mail: [benoit.guchet@gmail.com](mailto:benoit.guchet@gmail.com))
+Author : Benoît Guchet (twitter: [@Yoggghourt](url:https:/twitter.com/yoggghourt), mail: [benoit.guchet@gmail.com](mailto:benoit.guchet@gmail.com))
