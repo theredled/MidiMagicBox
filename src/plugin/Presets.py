@@ -3,6 +3,7 @@ from src.debug import print_v
 import os, json
 from functools import partial
 
+from src.ClickSequence import ClickSequence
 
 class Presets(Plugin.Plugin):
 
@@ -11,12 +12,14 @@ class Presets(Plugin.Plugin):
         self.presets = {}
         self.presets_file_path = "presets.json"
         self.saving_preset = None
+        self.dbl_click_sequence = ClickSequence(2)
         self.saving_pending_plugins = []
 
     def listen_control(self, message):
         # -- Save preset
         if message.type == 'program_change' and self.gateway.sustain_is_active:
-            self.save_preset(message.program)
+            self.dbl_click_sequence.set_callback(lambda: self.save_preset(message.program))
+            self.dbl_click_sequence.notify_click()
 
         # -- Load preset
         elif message.type == 'program_change' and not self.gateway.sustain_is_active:

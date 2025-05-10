@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # -- Interface générale
 
 import traceback, mido, argparse, time, sys
